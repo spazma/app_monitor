@@ -8,10 +8,15 @@ Pozwala dodawać aplikacje, uruchamiać je, zatrzymywać, restartować oraz moni
 ## ▶️ Uruchomienie:
 1. start_server.bat - uruchamia server lokalny server.ps1 / localhost:8080
 2. index.html - monitoruje aplikacje w tle z opcją / kill / restart
+<br><br>
 
+- okno główne
 <img width="890" height="780" alt="app-mon" src="https://github.com/user-attachments/assets/a2e27e6e-7f69-4800-8cf1-450192786ddc" />
+<br><br>
 
+- server
 <img width="529" height="224" alt="4607cmd_Q8qZTH44Ns" src="https://github.com/user-attachments/assets/c751b5bc-7f80-4246-8b77-03d39ca5aca6" />
+<br><br>
 
 ## 📄 Licencja:
 używaj jak chcesz :) feel free
