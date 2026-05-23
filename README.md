@@ -6,8 +6,8 @@
 Pozwala dodawać aplikacje, uruchamiać je, zatrzymywać, restartować oraz monitorować ich status w czasie rzeczywistym.
 <br><br>
 ## 📥 Instalacja
-1. Pobierz https://github.com/spazma/app_monitor/archive/refs/tags/1.0.zip
-2. Rozpakuj pliki na dysk
+1. pobierz https://github.com/spazma/app_monitor/archive/refs/tags/1.0.zip
+2. rozpakuj pliki na dysk
 <br>
 
 ## ▶️ Uruchomienie:
