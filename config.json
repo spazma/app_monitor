@@ -1,0 +1,51 @@
+﻿{
+    "apps":  [
+                 {
+                     "name":  "Firefox",
+                     "process":  "firefox",
+                     "path":  "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
+                 },
+                 {
+                     "name":  "Paint Shop Pro 8",
+                     "process":  "Paint Shop Pro",
+                     "path":  "C:\\Program Files (x86)\\Jasc Software Inc\\Paint Shop Pro 8\\Paint Shop Pro.exe"
+                 },
+                 {
+                     "name":  "vivaldi",
+                     "process":  "vivaldi",
+                     "path":  "D:\\_browsers\\vivaldi\\Application\\vivaldi.exe"
+                 }
+             ],
+    "monitor":  [
+                    {
+                        "name":  "Miranda64",
+                        "process":  "miranda64",
+                        "path":  "E:\\!miranda\\miranda64.exe",
+                        "clickable":  true
+                    },
+                    {
+                        "name":  "HWiNFO64",
+                        "process":  "HWiNFO64",
+                        "path":  "C:\\Users\\olo19\\Desktop\\HWiNFO64\\HWiNFO64.exe",
+                        "clickable":  true
+                    },
+                    {
+                        "name":  "HD Sentinel",
+                        "process":  "hdsentinel",
+                        "path":  "C:\\Program Files (x86)\\Hard Disk Sentinel\\hdsentinel.exe",
+                        "clickable":  true
+                    },
+                    {
+                        "name":  "Notepad (testy)",
+                        "process":  "notepad",
+                        "path":  "notepad.exe",
+                        "clickable":  true
+                    },
+                    {
+                        "name":  "Foobar2000",
+                        "process":  "foobar2000",
+                        "path":  "D:\\foobar2000\\foobar2000.exe",
+                        "clickable":  true
+                    }
+                ]
+}

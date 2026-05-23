@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Monitor procesów</title>
+
+<style>
+body { 
+    font-family: Arial; 
+    padding: 20px; 
+    background: #222; 
+    color: #eee;
+}
+
+button { 
+    margin: 5px; 
+    padding: 6px 12px;
+    border: none;
+    cursor: pointer;
+}
+
+.box { 
+    border: 1px solid #444; 
+    padding: 10px; 
+    margin-bottom: 10px;
+    background: #333;
+}
+
+/* KOLOROWE PRZYCISKI STATUS */
+.status-running {
+    background-color: #28a745 !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+.status-stopped {
+    background-color: #dc3545 !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+/* MONITOROWANIE - status bez przycisków */
+.monitor-item {
+    padding: 8px;
+    margin-bottom: 8px;
+    background: #2a2a2a;
+    border-left: 3px solid #444;
+}
+
+.monitor-running {
+    color: #eee;
+    border-left-color: #28a745;
+}
+
+.monitor-stopped {
+    color: #ff4444;
+    font-weight: bold;
+    border-left-color: #dc3545;
+    cursor: pointer;
+}
+
+.monitor-stopped:hover {
+    background: #333;
+    text-decoration: underline;
+}
+
+
+h2 {
+    margin-top: 1px;
+}
+
+h3 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #aaa;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.h3-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.h3-controls button {
+    padding: 4px 10px;
+    font-size: 14px;
+    background: #444;
+    color: #eee;
+    border: 1px solid #555;
+    border-radius: 3px;
+}
+
+.h3-controls button:hover {
+    background: #555;
+}
+
+/* SERVER ERROR */
+#serverError {
+    background-color: #dc3545;
+    color: white;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#serverError h3 {
+    border: none;
+    margin: 0 0 15px 0;
+    display: block;
+}
+
+#serverError button {
+    background-color: #fff;
+    color: #dc3545;
+    font-weight: bold;
+    padding: 8px 20px;
+    margin-top: 10px;
+}
+
+#serverError button:hover {
+    background-color: #eee;
+}
+
+/* MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    background-color: #333;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #666;
+    width: 90%;
+    max-width: 450px;
+    border-radius: 5px;
+    color: #eee;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-close {
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.modal-close:hover {
+    color: #fff;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    background: #2a2a2a;
+    border: 1px solid #555;
+    color: #eee;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #28a745;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+}
+
+.checkbox-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #555;
+    padding: 10px;
+    background: #2a2a2a;
+    border-radius: 3px;
+    margin-bottom: 12px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    margin-bottom: 6px;
+    min-width: 0;
+}
+
+.checkbox-item input[type="checkbox"] {
+    flex-shrink: 0;
+    margin: 0;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.checkbox-item label {
+    margin: 0;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.modal-buttons button {
+    padding: 8px 16px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.modal-buttons button:hover {
+    background: #218838;
+}
+
+.modal-buttons button.cancel {
+    background: #666;
+}
+
+.modal-buttons button.cancel:hover {
+    background: #777;
+}
+</style>
+</head>
+<body>
+
+<h2><img src="logo.png" alt="Logo" style="height:40px;"></h2>
+
+<div id="serverError" style="display: none;">
+    <h3>⚠ Serwer niedostępny</h3>
+    <p>Połączenie z serwerem API nie powiodło się.</p>
+    <button onclick="startServer()">Uruchom serwer</button>
+</div>
+
+<div id="apps"></div>
+
+<h3>
+    Aplikacje
+    <div class="h3-controls">
+        <button onclick="openAddModal('apps')">+ Dodaj aplikację</button>
+        <button onclick="openRemoveModal('apps')">- Usuń aplikację</button>
+    </div>
+</h3>
+<div id="appsContainer"></div>
+
+<h3>
+    Monitorowanie
+    <div class="h3-controls">
+        <button onclick="openAddModal('monitor')">+ Dodaj monitoring</button>
+        <button onclick="openRemoveModal('monitor')">- Usuń monitoring</button>
+    </div>
+</h3>
+<div id="monitor"></div>
+
+<!-- MODAL DODAWANIA APLIKACJI -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span>Dodaj aplikację</span>
+            <span class="modal-close" onclick="closeAddModal()">&times;</span>
+        </div>
+        
+        <div class="form-group">
+            <label>Nazwa aplikacji:</label>
+            <input type="text" id="appName" placeholder="np. Firefox">
+        </div>
+
+        <div class="form-group">
+            <label>Ścieżka do pliku .exe:</label>
+            <input type="text" id="appPath" placeholder="C:\Program Files\Firefox\firefox.exe">
+        </div>
+
+        <div class="modal-buttons">
+            <button class="cancel" onclick="closeAddModal()">Anuluj</button>
+            <button onclick="addApp()">Dodaj aplikację</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DODAWANIA DO MONITOROWANIA -->
+<div id="addMonitorModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span>Dodaj do monitorowania</span>
+            <span class="modal-close" onclick="closeAddMonitorModal()">&times;</span>
+        </div>
+        
+        <div class="form-group">
+            <label>Nazwa aplikacji:</label>
+            <input type="text" id="monitorAppName" placeholder="np. Firefox">
+        </div>
+
+        <div class="form-group">
+            <label>Ścieżka do pliku .exe:</label>
+            <input type="text" id="monitorAppPath" placeholder="C:\Program Files\Firefox\firefox.exe">
+        </div>
+
+        <div class="modal-buttons">
+            <button class="cancel" onclick="closeAddMonitorModal()">Anuluj</button>
+            <button onclick="addMonitor()">Dodaj do monitorowania</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL USUNIĘCIA -->
+<div id="removeModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="removeModalTitle">Usuń aplikację</span>
+            <span class="modal-close" onclick="closeRemoveModal()">&times;</span>
+        </div>
+        
+        <div class="form-group">
+            <label>Zaznacz aplikacje do usunięcia:</label>
+            <div class="checkbox-list" id="removeList"></div>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="cancel" onclick="closeRemoveModal()">Anuluj</button>
+            <button onclick="removeApps()">Usuń zaznaczone</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentSection = null;
+let serverAvailable = false;
+let serverCheckInterval = null;
+let autoRefreshInterval = null;
+
+function startServer() {
+    // Odczytaj ścieżkę z adresu HTML-u
+    let htmlPath = window.location.href;
+    let folderPath = htmlPath.substring(8); // Usuń "file:///"
+    folderPath = folderPath.substring(0, folderPath.lastIndexOf("/"));
+    
+    // Konwertuj / na \
+    folderPath = folderPath.replace(/\//g, "\\");
+    
+    alert(`Uruchom najpierw start_server.bat\n\nmusisz ręcznie wkazać plik\nnie moge z poziomu przeglądarki! :(`);
+    window.location.href = "file:///" + folderPath.replace(/\\/g, "/");
+    
+    // Spróbuj połączyć się co 3 sekundy
+    if (serverCheckInterval) clearInterval(serverCheckInterval);
+    serverCheckInterval = setInterval(checkServer, 3000);
+}
+
+async function checkServer() {
+    try {
+        const res = await fetch("http://localhost:8080/list");
+        if (res.ok) {
+            serverAvailable = true;
+            document.getElementById("serverError").style.display = "none";
+            loadApps();
+
+            // WAŻNE - stop sprawdzania gdy serwer online
+            if (serverCheckInterval) {
+                clearInterval(serverCheckInterval);
+                serverCheckInterval = null;
+            }
+
+            startAutoRefresh();
+            return;
+        }
+    } catch (e) {
+        // Serwer niedostępny
+    }
+
+    serverAvailable = false;
+    document.getElementById("serverError").style.display = "block";
+    document.getElementById("appsContainer").innerHTML = "";
+    document.getElementById("monitor").innerHTML = "";
+
+    // Zatrzymaj auto-refresh gdy serwer spadł
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+    }
+}
+
+async function loadApps() {
+    if (!serverAvailable) return;
+    
+    try {
+        const res = await fetch("http://localhost:8080/list");
+        const data = await res.json();
+
+        const container = document.getElementById("appsContainer");
+        container.innerHTML = "";
+
+        data.apps.forEach(app => {
+            const div = document.createElement("div");
+            div.className = "box";
+
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <div>
+                        <b>${app.name}</b> (${app.process})<br>
+                    </div>
+                </div>
+
+                <button id="btn-${app.process}" onclick="action('${app.process}', 'status')">
+                    Status
+                </button>
+
+                <button id="start-${app.process}" onclick="action('${app.process}', 'start')">Start</button>
+                <button id="kill-${app.process}" onclick="action('${app.process}', 'kill')">Kill</button>
+                <button id="restart-${app.process}" onclick="action('${app.process}', 'restart')">Restart</button>
+            `;
+
+            container.appendChild(div);
+
+            // automatyczne pobranie statusu przy starcie
+            action(app.process, "status");
+        });
+
+        // Monitorowanie
+        const monitorContainer = document.getElementById("monitor");
+        monitorContainer.innerHTML = "";
+
+        data.monitor.forEach(app => {
+            const div = document.createElement("div");
+            div.className = "monitor-item";
+            div.id = `monitor-${app.process}`;
+
+            div.innerHTML = `<b>${app.name}</b> - <span id="status-${app.process}">sprawdzanie...</span>`;
+
+            if (app.clickable) {
+                div.style.cursor = "pointer";
+                div.onclick = () => monitorAction(app.process, app.path);
+            }
+
+            monitorContainer.appendChild(div);
+
+            // pobranie statusu
+            checkMonitorStatus(app.process);
+        });
+    } catch (e) {
+        console.error("Błąd ładowania aplikacji:", e);
+        serverAvailable = false;
+        document.getElementById("serverError").style.display = "block";
+    }
+}
+
+async function action(proc, cmd) {
+    if (!serverAvailable) return;
+    
+    const res = await fetch(`http://localhost:8080/${cmd}?proc=${proc}`);
+    const text = await res.text();
+
+    const btn = document.getElementById(`btn-${proc}`);
+    const btnStart = document.getElementById(`start-${proc}`);
+    const btnKill = document.getElementById(`kill-${proc}`);
+    const btnRestart = document.getElementById(`restart-${proc}`);
+
+    // reset klas
+    btn.classList.remove("status-running", "status-stopped");
+
+    if (text === "running") {
+        btn.classList.add("status-running");
+        btn.innerText = "Running";
+
+        // POKAŻ Kill i Restart
+        btnKill.style.display = "inline-block";
+        btnRestart.style.display = "inline-block";
+
+        // Start ukryty
+        btnStart.style.display = "none";
+
+    } else if (text === "stopped") {
+        btn.classList.add("status-stopped");
+        btn.innerText = "Stopped";
+
+        // UKRYJ Kill i Restart
+        btnKill.style.display = "none";
+        btnRestart.style.display = "none";
+
+        // Start widoczny
+        btnStart.style.display = "inline-block";
+
+    } else {
+        btn.innerText = text;
+    }
+}
+
+async function checkMonitorStatus(proc) {
+    if (!serverAvailable) return;
+    
+    try {
+        const res = await fetch(`http://localhost:8080/status?proc=${proc}`);
+        const text = await res.text();
+
+        const statusSpan = document.getElementById(`status-${proc}`);
+        const item = document.getElementById(`monitor-${proc}`);
+
+        if (!item) return;
+
+        item.classList.remove("monitor-running", "monitor-stopped");
+
+        if (text === "running") {
+            statusSpan.innerText = "✓ uruchomiona";
+            item.classList.add("monitor-running");
+        } else if (text === "stopped") {
+            statusSpan.innerText = "✗ wyłączona (kliknij aby uruchomić)";
+            item.classList.add("monitor-stopped");
+        } else {
+            statusSpan.innerText = text;
+        }
+    } catch (e) {
+        // Serwer spadł
+        serverAvailable = false;
+        document.getElementById("serverError").style.display = "block";
+    }
+}
+
+async function monitorAction(proc, path) {
+    if (!serverAvailable) return;
+    
+    const res = await fetch(`http://localhost:8080/status?proc=${proc}`);
+    const text = await res.text();
+
+    if (text === "stopped") {
+        // Uruchom
+        await fetch(`http://localhost:8080/start?proc=${proc}`);
+        checkMonitorStatus(proc);
+    }
+}
+
+// ===== MODALS =====
+
+function openAddModal(section) {
+    if (!serverAvailable) {
+        alert("Serwer niedostępny!");
+        return;
+    }
+    
+    currentSection = section;
+    
+    if (section === "monitor") {
+        openAddMonitorModal();
+    } else {
+        document.getElementById("addModal").style.display = "block";
+        document.getElementById("appName").value = "";
+        document.getElementById("appPath").value = "";
+    }
+}
+
+function closeAddModal() {
+    document.getElementById("addModal").style.display = "none";
+}
+
+async function openAddMonitorModal() {
+    if (!serverAvailable) {
+        alert("Serwer niedostępny!");
+        return;
+    }
+    
+    document.getElementById("addMonitorModal").style.display = "block";
+    document.getElementById("monitorAppName").value = "";
+    document.getElementById("monitorAppPath").value = "";
+}
+
+function closeAddMonitorModal() {
+    document.getElementById("addMonitorModal").style.display = "none";
+}
+
+async function addApp() {
+    const name = document.getElementById("appName").value.trim();
+    let path = document.getElementById("appPath").value.trim();
+
+    if (!name || !path) {
+        alert("Wypełnij wszystkie pola!");
+        return;
+    }
+
+    path = path.replace(/\//g, "\\").trim();
+
+    if (!path.toLowerCase().endsWith(".exe")) {
+        path += ".exe";
+    }
+
+    if (!serverAvailable) {
+        alert("Serwer niedostępny!");
+        return;
+    }
+
+    const processName = path.substring(path.lastIndexOf("\\") + 1).replace(".exe", "").toLowerCase();
+
+    const payload = {
+        section: "apps",
+        name: name,
+        path: path,
+        process: processName
+    };
+
+    try {
+        const res = await fetch("http://localhost:8080/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            alert("Błąd przy dodawaniu aplikacji");
+            return;
+        }
+
+        closeAddModal();
+        loadApps();
+    } catch (error) {
+        console.error("Błąd:", error);
+        alert("Błąd: " + error.message);
+    }
+}
+
+async function addMonitor() {
+    const name = document.getElementById("monitorAppName").value.trim();
+    let path = document.getElementById("monitorAppPath").value.trim();
+
+    if (!name || !path) {
+        alert("Wypełnij wszystkie pola!");
+        return;
+    }
+
+    path = path.replace(/\//g, "\\").trim();
+
+    if (!path.toLowerCase().endsWith(".exe")) {
+        path += ".exe";
+    }
+
+    if (!serverAvailable) {
+        alert("Serwer niedostępny!");
+        return;
+    }
+
+    const processName = path.substring(path.lastIndexOf("\\") + 1).replace(".exe", "").toLowerCase();
+
+    const payload = {
+        section: "monitor",
+        name: name,
+        path: path,
+        process: processName,
+        clickable: true
+    };
+
+    try {
+        const res = await fetch("http://localhost:8080/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            alert("Błąd przy dodawaniu do monitorowania");
+            return;
+        }
+
+        closeAddMonitorModal();
+        loadApps();
+    } catch (error) {
+        console.error("Błąd:", error);
+        alert("Błąd: " + error.message);
+    }
+}
+
+
+async function openRemoveModal(section) {
+    if (!serverAvailable) {
+        alert("Serwer niedostępny!");
+        return;
+    }
+    
+    currentSection = section;
+    document.getElementById("removeModal").style.display = "block";
+
+    if (section === "apps") {
+        document.getElementById("removeModalTitle").innerText = "Usuń aplikację";
+    } else {
+        document.getElementById("removeModalTitle").innerText = "Usuń monitoring";
+    }
+
+    const res = await fetch("http://localhost:8080/list");
+    const data = await res.json();
+    const apps = data[section];
+
+    const list = document.getElementById("removeList");
+    list.innerHTML = "";
+
+    apps.forEach(app => {
+        const div = document.createElement("div");
+        div.className = "checkbox-item";
+        div.innerHTML = `
+            <input type="checkbox" value="${app.process}" class="remove-checkbox">
+            <label>${app.name}</label>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function closeRemoveModal() {
+    document.getElementById("removeModal").style.display = "none";
+}
+
+async function removeApps() {
+    const checkboxes = document.querySelectorAll(".remove-checkbox:checked");
+    const toRemove = Array.from(checkboxes).map(cb => cb.value);
+
+    if (toRemove.length === 0) {
+        alert("Nie zaznaczono żadnych aplikacji!");
+        return;
+    }
+
+    if (!confirm(`Usunąć ${toRemove.length} aplikację/e?`)) {
+        return;
+    }
+
+    const res = await fetch("http://localhost:8080/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            section: currentSection,
+            processes: toRemove
+        })
+    });
+
+    if (res.ok) {
+        closeRemoveModal();
+        loadApps();
+    } else {
+        alert("Błąd przy usuwaniu aplikacji");
+    }
+}
+
+// Zamknij modal klikając poza nim
+window.onclick = function(event) {
+    const addModal = document.getElementById("addModal");
+    const addMonitorModal = document.getElementById("addMonitorModal");
+    const removeModal = document.getElementById("removeModal");
+
+    if (event.target == addModal) {
+        closeAddModal();
+    }
+    if (event.target == addMonitorModal) {
+        closeAddMonitorModal();
+    }
+    if (event.target == removeModal) {
+        closeRemoveModal();
+    }
+}
+
+function startAutoRefresh() {
+    // Zatrzymaj istniejący interwał jeśli istnieje
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+    }
+
+    autoRefreshInterval = setInterval(() => {
+        if (!serverAvailable) {
+            // Jeśli serwer spadł - wyczyść wszystko i zatrzymaj
+            document.getElementById("appsContainer").innerHTML = "";
+            document.getElementById("monitor").innerHTML = "";
+            clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+            return;
+        }
+
+        // Monitorowanie
+        document.querySelectorAll("[id^='monitor-']").forEach(item => {
+            const proc = item.id.replace("monitor-", "");
+            checkMonitorStatus(proc);
+        });
+    }, 5000);
+}
+
+// Start - sprawdź serwer
+checkServer();
+
+// Jeśli serwer nie działa - sprawdzaj co 5 sekund
+serverCheckInterval = setInterval(checkServer, 5000);
+
+</script>
+
+</body>
+</html>
