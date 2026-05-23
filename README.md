@@ -2,7 +2,7 @@
   <img src="logo.png" alt="Logo" height="60">
 </h2>
 
-**app_monitor** to lekka aplikacja webowa służąca do zarządzania i monitorowania procesów systemowych.  
+**app_monitor** to lekka aplikacja służąca do zarządzania i monitorowania procesów systemowych.  
 Pozwala dodawać aplikacje, uruchamiać je, zatrzymywać, restartować oraz monitorować ich status w czasie rzeczywistym.
 
 ## ▶️ Uruchomienie:
