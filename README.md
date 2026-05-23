@@ -4,6 +4,11 @@
 
 **app_monitor** to lekka aplikacja służąca do zarządzania i monitorowania procesów systemowych.  
 Pozwala dodawać aplikacje, uruchamiać je, zatrzymywać, restartować oraz monitorować ich status w czasie rzeczywistym.
+<br><br>
+## 📥 Instalacja
+1. Pobierz https://github.com/spazma/app_monitor/archive/refs/tags/1.0.zip
+2. Rozpakuj pliki na dysk
+<br>
 
 ## ▶️ Uruchomienie:
 1. start_server.bat - uruchamia server lokalny server.ps1 / localhost:8080
